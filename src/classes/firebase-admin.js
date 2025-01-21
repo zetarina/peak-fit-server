@@ -9,12 +9,10 @@ class FirebaseAdmin {
   constructor() {
     if (!instance) {
       try {
-        // Read and parse the service account key
         const serviceAccount = JSON.parse(
           readFileSync(new URL("./service-account.json", import.meta.url))
         );
 
-        // Initialize Firebase Admin SDK
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
           databaseURL: process.env.DATABASE_URL,
@@ -22,7 +20,7 @@ class FirebaseAdmin {
         });
 
         console.log("Firebase Admin Initialized", process.env.DATABASE_URL);
-        instance = this; // Set the singleton instance
+        instance = this;
       } catch (error) {
         console.error("Error initializing Firebase Admin:", error.message);
         throw new Error("Failed to initialize Firebase Admin SDK");

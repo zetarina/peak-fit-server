@@ -136,6 +136,7 @@ class UserRepository {
       email: userData.email,
       username: userData.username,
       businessCertification: userData.businessCertification,
+      isApproveUser: false,
       createdAt: new Date().toISOString(),
     });
 

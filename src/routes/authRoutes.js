@@ -4,7 +4,7 @@ import UserRepository from "../repositories/UserRepository.js";
 import jwt from "jsonwebtoken";
 import uploadPDF from "../middlewares/uploadPDFMiddleware.js";
 import EmailService from "../classes/EmailService.js";
-
+import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 const signupSchema = yup.object().shape({
@@ -25,7 +25,6 @@ router.post(
         { abortEarly: false }
       );
 
-      // Check if a user already exists in Firebase Authentication
       const existingUserInAuth = await UserRepository.getAuthUserByEmail(email);
       if (existingUserInAuth) {
         return res
@@ -33,7 +32,6 @@ router.post(
           .json({ error: "User already exists. Please log in." });
       }
 
-      // Check if a temporary verification exists in Firestore
       const existingVerification = await UserRepository.getVerificationByEmail(
         email
       );
@@ -44,19 +42,16 @@ router.post(
         });
       }
 
-      // Ensure a business certification file is provided
       if (!req.file) {
         return res
           .status(400)
           .json({ error: "Business certification (PDF) is required." });
       }
 
-      // Upload the business certification file to Firebase Storage
       const fileUrl = await UserRepository.uploadBusinessCertification(
         req.file
       );
 
-      // Generate a verification code
       const verificationCode = await UserRepository.generateVerificationCode(
         email,
         {
@@ -107,7 +102,6 @@ router.post(
   }
 );
 
-// Route to handle user verification
 router.post("/verify-signup", async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -116,13 +110,10 @@ router.post("/verify-signup", async (req, res) => {
       return res.status(400).json({ error: "Email and code are required." });
     }
 
-    // Validate the verification code
     const userData = await UserRepository.validateVerificationCode(email, code);
 
-    // Create a new user in Firebase Authentication
     const userRecord = await UserRepository.createUser(userData);
 
-    // Generate JWT token for the user
     const authToken = jwt.sign(
       { uid: userRecord.uid, email: userData.email },
       process.env.JWT_SECRET || "nothinglastforever",
@@ -195,7 +186,6 @@ router.post("/resend-code", async (req, res) => {
       return res.status(400).json({ error: "Email is required." });
     }
 
-    // Check if the user already exists in Firebase Auth
     const existingUserInAuth = await UserRepository.getAuthUserByEmail(email);
     if (existingUserInAuth) {
       return res
@@ -203,7 +193,6 @@ router.post("/resend-code", async (req, res) => {
         .json({ error: "User already exists. Please log in." });
     }
 
-    // Check if a previous verification exists
     const existingVerification = await UserRepository.getVerificationByEmail(
       email
     );
@@ -211,12 +200,10 @@ router.post("/resend-code", async (req, res) => {
       await UserRepository.deleteVerificationByEmail(email);
     }
 
-    // Generate a new verification code
     const newCode = await UserRepository.generateVerificationCode(email, {
       email,
     });
 
-    // Send the new verification code via email
     await EmailService.sendEmailasHTML(
       email,
       "Resend Verification Code",
@@ -263,10 +250,9 @@ router.post("/forget-password", async (req, res) => {
         .status(404)
         .json({ error: "User not found with this email. Please sign up." });
     }
-    // Generate a password reset link
+
     const resetLink = await UserRepository.generatePasswordResetLink(email);
 
-    // Send the email with the reset link
     await EmailService.sendEmailasHTML(
       email,
       "Password Reset Request",
@@ -310,6 +296,16 @@ router.post("/forget-password", async (req, res) => {
 
     res.status(500).json({ error: "Failed to send password reset email." });
   }
+});
+router.get("/validate", authMiddleware(false), async (req, res) => {
+  const { uid } = req.user;
+  const user = await UserRepository.getUserById(uid);
+
+  res.status(200).json({
+    uid,
+    email: user.email,
+    isApproveUser: user.isApproveUser || false,
+  });
 });
 
 export default router;
