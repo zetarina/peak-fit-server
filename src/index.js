@@ -21,7 +21,8 @@ if (!process.env.PORT) {
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import meRoutes from "./routes/meRoutes.js";
-import personalizedWorkoutRoutes from "./routes/personalized-workout.js";
+import personalizedWorkoutRoutes from "./routes/personalizedWorkoutRoutes.js";
+import workoutRoutes from "./routes/workoutRoute.js";
 // Initialize the Express app
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/me", meRoutes);
 app.use("/personalized-workout", personalizedWorkoutRoutes);
+app.use("/workouts", workoutRoutes);
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
