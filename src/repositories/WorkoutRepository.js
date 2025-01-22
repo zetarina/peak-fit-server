@@ -16,12 +16,6 @@ class WorkoutRepository {
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   }
 
-  // Firestore: Add a new pending workout
-  async addPendingWorkout(workoutData) {
-    const docRef = await this.pendingWorkoutsCollection.add(workoutData);
-    return { id: docRef.id, ...workoutData };
-  }
-
   // Realtime DB: Fetch all approved workouts
   async fetchApprovedWorkouts() {
     const snapshot = await this.approvedWorkoutsRef.once("value");
@@ -32,17 +26,25 @@ class WorkoutRepository {
     }));
   }
 
-  // Realtime DB: Add a workout to approved workouts
+  // Realtime DB: Add a new workout directly to approved workouts
+  async addApprovedWorkout(workoutData) {
+    const workoutRef = this.approvedWorkoutsRef.push();
+    await workoutRef.set(workoutData);
+    return { id: workoutRef.key, ...workoutData };
+  }
+
+  // Approve a workout: Move from pending to approved
   async approveWorkout(workout) {
     const workoutRef = this.approvedWorkoutsRef.push();
     await workoutRef.set(workout);
-    await this.pendingWorkoutsCollection.doc(workout.id).delete();
+    await this.pendingWorkoutsCollection.doc(workout.id).delete(); // Remove from pending
+    return { id: workoutRef.key, ...workout };
   }
 
-  // Firestore: Update a pending workout
-  async updatePendingWorkout(workoutId, updateData) {
-    await this.pendingWorkoutsCollection.doc(workoutId).update(updateData);
-    return { message: "Workout updated successfully" };
+  // Realtime DB: Update an approved workout
+  async updateApprovedWorkout(workoutId, updateData) {
+    await this.approvedWorkoutsRef.child(workoutId).update(updateData);
+    return { message: "Approved workout updated successfully" };
   }
 
   // Firestore: Delete a pending workout

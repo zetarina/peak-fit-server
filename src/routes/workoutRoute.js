@@ -35,7 +35,25 @@ router.post("/approve", async (req, res) => {
       .json({ success: false, message: "Failed to approve workout" });
   }
 });
+router.post("/createApproved", async (req, res) => {
+  const workoutData = req.body;
 
+  if (!workoutData || Object.keys(workoutData).length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid workout data" });
+  }
+
+  try {
+    const newWorkout = await WorkoutRepository.addApprovedWorkout(workoutData);
+    res.json({ success: true, data: newWorkout, message: "Workout created successfully" });
+  } catch (error) {
+    console.error("Error adding approved workout:", error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to add approved workout" });
+  }
+});
 // Fetch all approved workouts (Realtime Database)
 router.get("/approved", async (req, res) => {
   try {
@@ -46,6 +64,28 @@ router.get("/approved", async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to fetch approved workouts" });
+  }
+});
+
+// Update an approved workout
+router.put("/approved/:id", async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  if (!updateData || Object.keys(updateData).length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid update data" });
+  }
+
+  try {
+    const result = await WorkoutRepository.updateApprovedWorkout(id, updateData);
+    res.json({ success: true, message: result.message });
+  } catch (error) {
+    console.error("Error updating approved workout:", error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update approved workout" });
   }
 });
 
