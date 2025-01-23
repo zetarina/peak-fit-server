@@ -2,8 +2,8 @@ import FirebaseAdmin from "../classes/firebase-admin.js";
 
 class UserRepository {
   constructor() {
-    this.db = FirebaseAdmin.getDatabase();
-    this.usersRef = this.db.ref("business-users");
+    this.realtimeDb = FirebaseAdmin.getDatabase();
+    this.usersRef = this.realtimeDb.ref("business-users");
     this.auth = FirebaseAdmin.getAuth();
     this.firestore = FirebaseAdmin.getFirestore();
     this.storage = FirebaseAdmin.getStorage();

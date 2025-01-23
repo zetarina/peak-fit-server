@@ -20,7 +20,7 @@ const profileUpdateSchema = yup.object().shape({
 });
 
 const router = express.Router();
-router.get("/my-account", authMiddleware, async (req, res) => {
+router.get("/my-account", authMiddleware(), async (req, res) => {
   try {
     const { uid } = req.user;
 
@@ -39,7 +39,7 @@ router.get("/my-account", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve account details." });
   }
 });
-router.put("/update-profile", authMiddleware, async (req, res) => {
+router.put("/update-profile", authMiddleware(), async (req, res) => {
   try {
     const { uid } = req.user;
     const { username, password } = req.body;
@@ -123,7 +123,7 @@ router.post(
     }
   }
 );
-router.put("/delete-certification", authMiddleware, async (req, res) => {
+router.put("/delete-certification", authMiddleware(), async (req, res) => {
   try {
     const { uid } = req.user;
     const { certification } = req.body.data;

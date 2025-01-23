@@ -4,7 +4,7 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/", authMiddleware(), async (req, res) => {
   const { uid } = req.user;
 
   try {
@@ -18,7 +18,7 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:workoutId", authMiddleware, async (req, res) => {
+router.get("/:workoutId", authMiddleware(), async (req, res) => {
   const { uid } = req.user;
   const { workoutId } = req.params;
 
@@ -34,7 +34,7 @@ router.get("/:workoutId", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", authMiddleware(), async (req, res) => {
   const { uid } = req.user;
   const workoutData = req.body;
 
@@ -50,7 +50,7 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/:workoutId", authMiddleware, async (req, res) => {
+router.put("/:workoutId", authMiddleware(), async (req, res) => {
   const { uid } = req.user;
   const { workoutId } = req.params;
   const updateData = req.body;
@@ -70,10 +70,10 @@ router.put("/:workoutId", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:workoutId", authMiddleware, async (req, res) => {
+router.delete("/:workoutId", authMiddleware(), async (req, res) => {
   const { uid } = req.user;
   const { workoutId } = req.params;
-
+  console.log(uid, workoutId);
   try {
     const result = await PersonalizedWorkoutRepository.deleteWorkout(
       uid,
@@ -88,28 +88,29 @@ router.delete("/:workoutId", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/bulk", authMiddleware, async (req, res) => {
+router.post("/bulk", authMiddleware(), async (req, res) => {
   const { uid } = req.user;
   const workouts = req.body;
+  console.log(workouts)
+  // if (!Array.isArray(workouts)) {
+  //   return res
+  //     .status(400)
+  //     .json({ success: false, message: "Workouts must be an array" });
+  // }
 
-  if (!Array.isArray(workouts)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Workouts must be an array" });
-  }
-
-  try {
-    const result = await PersonalizedWorkoutRepository.addBulkWorkouts(
-      uid,
-      workouts
-    );
-    res.json({ success: true, message: result.message });
-  } catch (error) {
-    console.error("Error adding bulk workouts:", error.message);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to add bulk workouts" });
-  }
+  // try {
+  //   const result = await PersonalizedWorkoutRepository.addBulkWorkouts(
+  //     uid,
+  //     workouts
+  //   );
+  //   res.json({ success: true, message: result.message });
+  // } catch (error) {
+  //   console.error("Error adding bulk workouts:", error.message);
+  //   res
+  //     .status(500)
+  //     .json({ success: false, message: "Failed to add bulk workouts" });
+  // }
+      res.json({ success: true, message: 'testnig' });
 });
 
 export default router;

@@ -2,13 +2,13 @@ import FirebaseAdmin from "../classes/firebase-admin.js";
 
 class PersonalizedWorkoutRepository {
   constructor() {
-    this.db = FirebaseAdmin.getDatabase();
-    this.workoutsRef = this.db.ref("personalized-workouts");
+    this.realtimeDb = FirebaseAdmin.getDatabase();
+    this.workoutsRef = this.realtimeDb.ref("personalized-workouts");
   }
 
   async getWorkoutsByUser(uid) {
     const userWorkoutsRef = this.workoutsRef.child(uid);
-    const snapshot = await userWorkoutsRef.once("value");
+    const snapshot = await userWorkoutsRef.once("value"); 
 
     if (!snapshot.exists()) {
       return [];

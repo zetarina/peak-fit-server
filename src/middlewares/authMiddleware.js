@@ -21,9 +21,16 @@ const authMiddleware =
 
       if (approvalRequired) {
         const { uid } = decodedToken;
+
         const user = await UserRepository.getUserById(uid);
 
-        if (!user || !user.isApproveUser) {
+        if (!user) {
+          return res
+            .status(403)
+            .json({ error: "Access denied. Approval required." });
+        }
+
+        if (!user.isApproveUser) {
           return res
             .status(403)
             .json({ error: "Access denied. Approval required." });
@@ -32,8 +39,6 @@ const authMiddleware =
 
       next();
     } catch (error) {
-      console.error("Authentication Error:", error.message);
-
       if (error.name === "JsonWebTokenError") {
         return res.status(401).json({ error: "Invalid token." });
       }

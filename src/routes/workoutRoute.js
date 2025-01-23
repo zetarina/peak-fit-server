@@ -18,6 +18,7 @@ router.get("/pending", async (req, res) => {
 
 // Approve a workout (Move from Firestore to Realtime DB)
 router.post("/approve", async (req, res) => {
+  console.log(req.body)
   const { workout } = req.body;
   if (!workout || !workout.id) {
     return res
@@ -92,6 +93,7 @@ router.put("/approved/:id", async (req, res) => {
 // Delete a pending workout
 router.delete("/pending/:id", async (req, res) => {
   const { id } = req.params;
+  console.log(id)
   try {
     const result = await WorkoutRepository.deletePendingWorkout(id);
     res.json({ success: true, message: result.message });
@@ -106,9 +108,11 @@ router.delete("/pending/:id", async (req, res) => {
 // Delete an approved workout
 router.delete("/approved/:id", async (req, res) => {
   const { id } = req.params;
+  console.log(id)
   try {
-    const result = await WorkoutRepository.deleteApprovedWorkout(id);
-    res.json({ success: true, message: result.message });
+      const result = await WorkoutRepository.deleteApprovedWorkout(id);
+      console.log(result)
+      res.json({ success: true, message: result.message });
   } catch (error) {
     console.error("Error deleting approved workout:", error.message);
     res

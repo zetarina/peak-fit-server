@@ -5,7 +5,7 @@ class WorkoutRepository {
     this.firestore = FirebaseAdmin.getFirestore();
     this.realtimeDb = FirebaseAdmin.getDatabase();
     this.pendingWorkoutsCollection =
-      this.firestore.collection("pending_workouts");
+      this.firestore.collection("Workout content");
     this.approvedWorkoutsRef = this.realtimeDb.ref("approved_workouts");
   }
 
@@ -13,7 +13,11 @@ class WorkoutRepository {
   async fetchPendingWorkouts() {
     const snapshot = await this.pendingWorkoutsCollection.get();
     if (snapshot.empty) return [];
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      contentUrl: doc.data().contentUrl,
+    }));
   }
 
   // Realtime DB: Fetch all approved workouts
@@ -36,9 +40,17 @@ class WorkoutRepository {
   // Approve a workout: Move from pending to approved
   async approveWorkout(workout) {
     const workoutRef = this.approvedWorkoutsRef.push();
-    await workoutRef.set(workout);
-    await this.pendingWorkoutsCollection.doc(workout.id).delete(); // Remove from pending
-    return { id: workoutRef.key, ...workout };
+
+    // Replace the `id` with the Firebase key
+    const workoutWithUpdatedId = { ...workout, id: workoutRef.key };
+
+    // Save the workout to the Realtime Database
+    await workoutRef.set(workoutWithUpdatedId);
+
+    // Remove the workout from the Firestore pending collection
+    await this.pendingWorkoutsCollection.doc(workout.id).delete();
+
+    return { id: workoutRef.key, ...workoutWithUpdatedId };
   }
 
   // Realtime DB: Update an approved workout
