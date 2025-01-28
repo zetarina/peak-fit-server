@@ -25,7 +25,7 @@ router.get("/my-account", authMiddleware(), async (req, res) => {
     const { uid } = req.user;
 
     const user = await UserRepository.getUserById(uid);
-
+    console.log(user)
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
@@ -134,7 +134,7 @@ router.put("/delete-certification", authMiddleware(), async (req, res) => {
 
     const user = await UserRepository.getUserById(uid);
     const certifications = user.businessCertification || [];
-    console.log(certification);
+
     if (!certifications.includes(certification)) {
       return res.status(404).json({ error: "Certification not found." });
     }

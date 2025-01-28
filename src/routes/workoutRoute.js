@@ -18,7 +18,6 @@ router.get("/pending", async (req, res) => {
 
 // Approve a workout (Move from Firestore to Realtime DB)
 router.post("/approve", async (req, res) => {
-  console.log(req.body)
   const { workout } = req.body;
   if (!workout || !workout.id) {
     return res
@@ -47,7 +46,11 @@ router.post("/createApproved", async (req, res) => {
 
   try {
     const newWorkout = await WorkoutRepository.addApprovedWorkout(workoutData);
-    res.json({ success: true, data: newWorkout, message: "Workout created successfully" });
+    res.json({
+      success: true,
+      data: newWorkout,
+      message: "Workout created successfully",
+    });
   } catch (error) {
     console.error("Error adding approved workout:", error.message);
     res
@@ -80,7 +83,10 @@ router.put("/approved/:id", async (req, res) => {
   }
 
   try {
-    const result = await WorkoutRepository.updateApprovedWorkout(id, updateData);
+    const result = await WorkoutRepository.updateApprovedWorkout(
+      id,
+      updateData
+    );
     res.json({ success: true, message: result.message });
   } catch (error) {
     console.error("Error updating approved workout:", error.message);
@@ -93,7 +99,7 @@ router.put("/approved/:id", async (req, res) => {
 // Delete a pending workout
 router.delete("/pending/:id", async (req, res) => {
   const { id } = req.params;
-  console.log(id)
+
   try {
     const result = await WorkoutRepository.deletePendingWorkout(id);
     res.json({ success: true, message: result.message });
@@ -108,11 +114,11 @@ router.delete("/pending/:id", async (req, res) => {
 // Delete an approved workout
 router.delete("/approved/:id", async (req, res) => {
   const { id } = req.params;
-  console.log(id)
+
   try {
-      const result = await WorkoutRepository.deleteApprovedWorkout(id);
-      console.log(result)
-      res.json({ success: true, message: result.message });
+    const result = await WorkoutRepository.deleteApprovedWorkout(id);
+
+    res.json({ success: true, message: result.message });
   } catch (error) {
     console.error("Error deleting approved workout:", error.message);
     res

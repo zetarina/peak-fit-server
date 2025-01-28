@@ -73,7 +73,7 @@ router.put("/:workoutId", authMiddleware(), async (req, res) => {
 router.delete("/:workoutId", authMiddleware(), async (req, res) => {
   const { uid } = req.user;
   const { workoutId } = req.params;
-  console.log(uid, workoutId);
+  
   try {
     const result = await PersonalizedWorkoutRepository.deleteWorkout(
       uid,

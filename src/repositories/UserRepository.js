@@ -18,6 +18,7 @@ class UserRepository {
   /** Retrieve a user by ID from Realtime Database */
   async getUserById(userId) {
     const snapshot = await this.usersRef.child(userId).once("value");
+
     if (!snapshot.exists()) {
       throw new Error("User not found");
     }
@@ -136,6 +137,7 @@ class UserRepository {
       email: userData.email,
       username: userData.username,
       businessCertification: userData.businessCertification,
+      userType: "business",
       isApproveUser: false,
       createdAt: new Date().toISOString(),
     });

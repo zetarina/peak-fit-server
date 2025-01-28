@@ -41,22 +41,7 @@ class EmailService {
 
   async createTransporter(authType = "OAuth2") {
     try {
-      if (authType === "OAuth2") {
-        // OAuth2 Transporter
-        const accessToken = await this.getAccessToken();
-
-        return nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-            type: "OAuth2",
-            user: this.emailUser,
-            clientId: this.oAuth2Client._clientId,
-            clientSecret: this.oAuth2Client._clientSecret,
-            refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-            accessToken,
-          },
-        });
-      } else if (authType === "AppPassword") {
+      if (authType === "AppPassword") {
         // App Password Transporter
         return nodemailer.createTransport({
           service: "gmail",
