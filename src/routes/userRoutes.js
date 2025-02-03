@@ -20,6 +20,7 @@ router.get("/", async (req, res) => {
 });
 router.get("/delete-all-workout", async (req, res) => {
   try {
+    console.log('delete')
     const result = await PersonalizedWorkoutRepository.deleteAllWorkouts();
     res.json({ success: true, message: result.message });
   } catch (error) {

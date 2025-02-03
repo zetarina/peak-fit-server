@@ -43,6 +43,7 @@ router.post(
       }
 
       if (!req.file) {
+        console.error("Business certification (PDF) is required.");
         return res
           .status(400)
           .json({ error: "Business certification (PDF) is required." });
@@ -135,6 +136,7 @@ router.post("/login", async (req, res) => {
     const { token } = req.body;
 
     if (!token) {
+      console.error("Token is required.");
       return res.status(400).json({ error: "Token is required." });
     }
 
@@ -183,6 +185,7 @@ router.post("/resend-code", async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
+      console.error("Email is required.");
       return res.status(400).json({ error: "Email is required." });
     }
 
@@ -242,6 +245,7 @@ router.post("/forget-password", async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
+      console.error("Email is required.");
       return res.status(400).json({ error: "Email is required." });
     }
     const existingUser = await UserRepository.getAuthUserByEmail(email);

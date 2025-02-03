@@ -108,12 +108,10 @@ class UserRepository {
   }
   async deleteBusinessCertification(fileUrl) {
     try {
-      // Extract the file path from the public URL
       const filePath = decodeURIComponent(
         fileUrl.split("/").pop().split("?")[0]
-      ); // Decode and strip query params if present
+      );
 
-      // Delete the file from Firebase Storage
       const bucketFile = this.storage.file(filePath);
       await bucketFile.delete();
 
@@ -124,25 +122,68 @@ class UserRepository {
       throw new Error("Failed to delete business certification.");
     }
   }
-
   /** Create a user in Firebase Authentication and store data in Realtime Database */
   async createUser(userData) {
-    const userRecord = await this.auth.createUser({
-      email: userData.email,
-      password: userData.password,
-      displayName: userData.username,
-    });
+    try {
+      let userRecord;
+      try {
+        userRecord = await this.auth.createUser({
+          email: userData.email,
+          password: userData.password,
+          displayName: userData.username,
+        });
+        console.log("User created in Firebase Authentication:", userRecord);
+      } catch (err) {
+        if (err.code === "auth/email-already-exists") {
+          const existingUser = await this.auth.getUserByEmail(userData.email);
+          await this.auth.deleteUser(existingUser.uid);
+          console.log("Existing user deleted successfully.");
 
-    await this.usersRef.child(userRecord.uid).set({
-      email: userData.email,
-      username: userData.username,
-      businessCertification: userData.businessCertification,
-      userType: "business",
-      isApproveUser: false,
-      createdAt: new Date().toISOString(),
-    });
+          userRecord = await this.auth.createUser({
+            email: userData.email,
+            password: userData.password,
+            displayName: userData.username,
+          });
+        } else {
+          console.error("Error creating user:", err);
+          throw new Error("Failed to create user in Firebase Authentication.");
+        }
+      }
+      console.log(userRecord.uid, {
+        email: userData.email,
+        username: userData.username,
+        businessCertification: userData.businessCertification,
+        userType: "business",
+        isApproveUser: false,
+        createdAt: new Date().toISOString(),
+      });
+      try {
+        await this.usersRef.child(userRecord.uid).set({
+          email: userData.email,
+          username: userData.username,
+          businessCertification: userData.businessCertification,
+          userType: "business",
+          isApproveUser: false,
+          createdAt: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.log("error creating userRef:", e);
+      }
 
-    return userRecord;
+      console.log("User data saved under business-users:", userRecord.uid);
+
+      const docRef = this.firestore
+        .collection("verification")
+        .doc(userData.email);
+      await docRef.delete();
+
+      console.log("Verification code deleted for email:", userData.email);
+
+      return userRecord;
+    } catch (err) {
+      console.error("Error in user creation:", err);
+      throw new Error("Failed to create the user or delete verification data.");
+    }
   }
 
   /** Generate a verification code and store it in Firestore */
@@ -163,7 +204,7 @@ class UserRepository {
   /** Generate a password reset link for Firebase Authentication */
   async generatePasswordResetLink(email) {
     try {
-      const resetLink = await this.auth.generatePasswordResetLink(email); // Firebase Auth
+      const resetLink = await this.auth.generatePasswordResetLink(email);
       console.log(`Password reset link generated for ${email}`);
       return resetLink;
     } catch (error) {
@@ -174,8 +215,6 @@ class UserRepository {
       throw new Error("Failed to generate password reset link.");
     }
   }
-
-  /** Validate a verification code from Firestore */
   async validateVerificationCode(email, code) {
     try {
       const docRef = this.firestore.collection("verification").doc(email);
@@ -191,22 +230,17 @@ class UserRepository {
       const verificationData = snapshot.data();
       console.log("Verification data retrieved:", verificationData);
 
-      // Check if the code has expired
       if (Date.now() > verificationData.expiry) {
         console.log("Verification code expired for email:", email);
-        await docRef.delete(); // Clean up expired code
         throw new Error("Verification code expired.");
       }
 
-      // Validate the provided code
       if (parseInt(code, 10) !== verificationData.code) {
         console.log("Invalid verification code for email:", email);
         throw new Error("Invalid verification code.");
       }
 
-      // Clean up after successful verification
       console.log("Verification successful for email:", email);
-      await docRef.delete();
       return verificationData;
     } catch (error) {
       console.error("Error validating verification code:", error.message);

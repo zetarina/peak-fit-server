@@ -1,0 +1,27 @@
+{
+  "PersonalisedWorkouts": {
+    "Build Muscle": {
+      "Sensitive Back": {
+        "Easy": {
+          "Monday": {
+            "exercises": {
+              "-OIA6GTvqpsMJlSbC_xc": {
+                "date": "2025-02-03T09:21:08.138Z",
+                "day": "Monday",
+                "duration": "",
+                "goal": "Build Muscle",
+                "id": "-OIA6GTvqpsMJlSbC_xc",
+                "level": "Easy",
+                "limitations": "Sensitive Back",
+                "thumbnail": "https://img.youtube.com/vi/oo0bZ6Vrepg/0.jpg",
+                "title": "https://www.youtube.com/watch?v=oo0bZ6Vrepg",
+                "videoUrl": "https://www.youtube.com/watch?v=oo0bZ6Vrepg",
+                "createdBy": ""
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
